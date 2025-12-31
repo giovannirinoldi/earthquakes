@@ -1,4 +1,4 @@
-from earthquakes import get_earthquake
+from eq_package.earthquakes import get_earthquake
 
 days = 10
 mag, place = get_earthquake(days)
