@@ -1,29 +1,36 @@
 import csv
+import sqlite3
+
 import requests
 from datetime import datetime, timedelta, timezone
 
+
 def gather_earthquakes(days):
     """
-    Fetch recent earthquake data from the INGV API within a specified time range and geographic bounding box.
+    Fetch recent earthquake data from the INGV API within a
+    specified time range and geographic bounding box.
 
-    The function reads geographic bounding box coordinates from a CSV file named 'bounding_box.csv',
-    queries the INGV API for earthquake data, and returns a list of tuples containing the earthquake details.
+    The function reads geographic bounding box coordinates from
+    a CSV file named 'bounding_box.csv',
+    queries the INGV API for earthquake data, and
+    returns a list of tuples containing the earthquake details.
 
     Args:
-        days (int): The number of days in the past to fetch earthquake data for.
+        days (int):
+        The number of days in the past to fetch earthquake data for.
 
     Returns:
-        list: A list of tuples, where each tuple contains:
-            - day (str): The date of the earthquake (YYYY-MM-DD format).
-            - time (str): The time of the earthquake (HH:MM:SS format).
-            - magnitude (float or None): The magnitude of the earthquake.
-            - latitude (float): The latitude of the earthquake's epicenter.
-            - longitude (float): The longitude of the earthquake's epicenter.
-            - place (str): A human-readable description of the earthquake's location.
+    list: A list of tuples, where each tuple contains:
+    - day (str): The date of the earthquake (YYYY-MM-DD format).
+    - time (str): The time of the earthquake (HH:MM:SS format).
+    - magnitude (float or None): The magnitude of the earthquake.
+    - latitude (float): The latitude of the earthquake's epicenter.
+    - longitude (float): The longitude of the earthquake's epicenter.
+    - place (str): A human-readable description of the earthquake's location.
     """
     # Step 1: Read the bounding box parameters from CSV file
     bounding_box = {}
-    with open('eq_package/bounding_box.csv', mode='r') as file:
+    with open('bounding_box.csv', mode='r') as file:
         reader = csv.reader(file)
         for row in reader:
             bounding_box[row[0]] = float(row[1])
@@ -44,7 +51,9 @@ def gather_earthquakes(days):
 
     # Step 3: Query the INGV API for earthquake data
     response = requests.get(url, params=params)
-    response.raise_for_status()  # Raise an HTTPError for bad responses (e.g., 404, 500)
+
+    # Raise an HTTPError for bad responses (e.g., 404, 500)
+    response.raise_for_status()
     data = response.json()
 
     # Step 4: Process the response and extract earthquake details
@@ -52,23 +61,32 @@ def gather_earthquakes(days):
     earthquake_list = []
 
     for event in events:
-        # Extract properties (metadata) and geometry (location) of the earthquake
+        # Extract properties (metadata) and geometry (location) of the eq
         properties = event['properties']
         geometry = event['geometry']
 
         # Convert the ISO 8601 time field into UTC date and time
-        timestamp = datetime.fromisoformat(properties['time'])  # Parse the ISO 8601 time
+        timestamp = datetime.fromisoformat(
+            properties['time']  # Parse the ISO 8601 time
+        )
         day = timestamp.strftime('%Y-%m-%d')  # Format as "YYYY-MM-DD"
         time = timestamp.strftime('%H:%M:%S')  # Format as "HH:MM:SS"
 
         # Extract other earthquake details
-        magnitude = properties['mag']  # Directly access 'mag' key
-        latitude = geometry['coordinates'][1]  # Latitude is the second value in 'coordinates'
-        longitude = geometry['coordinates'][0]  # Longitude is the first value in 'coordinates'
-        place = properties['place']  # Directly access 'place' key
+
+        # Directly access 'mag' key
+        magnitude = properties['mag']
+        # Latitude is the second value in 'coordinates'
+        latitude = geometry['coordinates'][1]
+        # Longitude is the first value in 'coordinates'
+        longitude = geometry['coordinates'][0]
+        # Directly access 'place' key
+        place = properties['place']
 
         # Append the earthquake details as a tuple
-        earthquake_list.append((day, time, magnitude, latitude, longitude, place))
+        earthquake_list.append(
+            (day, time, magnitude, latitude, longitude, place)
+        )
 
     # Step 5: Return the list of earthquake tuples
     return earthquake_list
@@ -81,3 +99,64 @@ if __name__ == "__main__":
     print("Earthquake Data:")
     for eq in earthquakes:
         print(eq)
+
+
+def create_earthquake_db() -> None:
+    """
+    Create an SQLite database and populate it with recent earthquake data.
+
+    This function:
+    1. Calls the gather_earthquakes function and
+        stores its output in a variable called 'earthquakes'.
+    2. Creates (if it does not already exist) a table named 'earthquakes_db'
+       with columns: day, time, mag, latitude, longitude, place.
+    3. Inserts all earthquake records into the database using executemany.
+    4. Closes the cursor and the database connection.
+
+    Returns:
+        None
+    """
+    # Retrieve earthquake data as a list of tuples:
+    # (day, time, mag, latitude, longitude, place)
+    earthquakes = gather_earthquakes(days)
+
+    # Open a connection to the SQLite database
+    conn = sqlite3.connect("earthquakes.db")
+    cursor = conn.cursor()
+
+    # SQL statement to create the table if it does not already exist
+    create_table_sql = """
+    CREATE TABLE IF NOT EXISTS earthquakes_db (
+        day TEXT,
+        time TEXT,
+        mag REAL,
+        latitude REAL,
+        longitude REAL,
+        place TEXT
+    );
+    """
+
+    # Execute the CREATE TABLE statement
+    cursor.execute(create_table_sql)
+    conn.commit()
+
+    # SQL statement to insert data into the table
+    insert_sql = """
+    INSERT INTO earthquakes_db (day, time, mag, latitude, longitude, place)
+    VALUES (?, ?, ?, ?, ?, ?);
+    """
+
+    # Insert all earthquake records into the database
+    cursor.executemany(insert_sql, earthquakes)
+    conn.commit()
+
+    # Close cursor and connection
+    cursor.close()
+    conn.close()
+
+
+# Test the function
+if __name__ == "__main__":
+    days = 7
+    create_earthquake_db()
+    print("Database created and populated")
