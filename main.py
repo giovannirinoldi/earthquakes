@@ -1,5 +1,7 @@
 import argparse
 
+from eq_package.earthquakes import *
+
 
 def main():
     # Create an argument parser object
@@ -31,8 +33,16 @@ def main():
     args = parser.parse_args()
 
     # Print the parsed arguments (For now, just to verify the input)
-    print(f"Days: {args.days}, K: {args.K}, Magnitude: {args.magnitude}")
+    #print(f"Days: {args.days}, K: {args.K}, Magnitude: {args.magnitude}")
 
+    create_earthquake_db(args.days)
+
+    # Call query_db with user inputs
+    earthquakes = query_db(args.K, args.days, args.magnitude)
+
+    # Print the results in the required format
+    print_earthquakes(earthquakes)
 
 if __name__ == "__main__":
     main()
+

@@ -30,7 +30,7 @@ def gather_earthquakes(days):
     """
     # Step 1: Read the bounding box parameters from CSV file
     bounding_box = {}
-    with open('bounding_box.csv', mode='r') as file:
+    with open('eq_package/bounding_box.csv', mode='r') as file:
         reader = csv.reader(file)
         for row in reader:
             bounding_box[row[0]] = float(row[1])
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         print(eq)
 
 
-def create_earthquake_db() -> None:
+def create_earthquake_db(days) -> None:
     """
     Create an SQLite database and populate it with recent earthquake data.
 
@@ -132,7 +132,8 @@ def create_earthquake_db() -> None:
         mag REAL,
         latitude REAL,
         longitude REAL,
-        place TEXT
+        place TEXT,
+        UNIQUE(day, time, mag, latitude, longitude, place) 
     );
     """
 
@@ -142,7 +143,7 @@ def create_earthquake_db() -> None:
 
     # SQL statement to insert data into the table
     insert_sql = """
-    INSERT INTO earthquakes_db (day, time, mag, latitude, longitude, place)
+    INSERT OR IGNORE INTO earthquakes_db (day, time, mag, latitude, longitude, place)
     VALUES (?, ?, ?, ?, ?, ?);
     """
 
@@ -160,3 +161,59 @@ if __name__ == "__main__":
     days = 7
     create_earthquake_db()
     print("Database created and populated")
+
+def query_db(k, days, min_magnitude) -> list[tuple]:
+    """
+    Query the earthquakes.db database for the strongest earthquakes.
+
+    Returns at most k earthquakes with magnitude >= min_magnitude that occurred
+    in the last `days` days, sorted by decreasing magnitude. (from tab earthquakes_db)
+
+    Arguments:
+        k (int): Maximum number of earthquakes to return.
+        days (int): Number of past days to consider.
+        min_magnitude (float): Minimum magnitude threshold.
+
+    Returns:
+        list[tuple]: List of tuples representing database rows.
+    """
+    # Calculate the minimum date to consider
+    min_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+
+    # Connect to the db
+    conn = sqlite3.connect("earthquakes.db")
+    cursor = conn.cursor()
+
+    # Write the query
+    query_sql = """
+    SELECT day, time, mag, latitude, longitude, place
+    FROM earthquakes_db
+    WHERE mag >= ?
+    AND day >= ?
+    ORDER BY mag DESC
+    LIMIT ?;
+    """
+
+    # Query the db with parameters
+    cursor.execute(query_sql, (min_magnitude, min_date, k))
+    results = cursor.fetchall()
+
+    # Close connection
+    cursor.close()
+    conn.close()
+
+    return results
+
+
+def print_earthquakes(earthquakes) -> None:
+    """
+    Print earthquake records in the required formatted style.
+
+    Arguments:
+        earthquakes (list[tuple]): List of earthquake tuples.
+    """
+    for day, time, mag, lat, lon, place in earthquakes:
+        print(
+            f"day: {day}, time: {time}, magnitude: {mag}, "
+            f"lat: {lat}, lon: {lon}, place: {place}"
+        )
