@@ -28,6 +28,11 @@ def main():
         required=True,
         help="The minimum magnitude of earthquakes to consider."
     )
+    parser.add_argument(
+        "--closest-municipalities",
+        action="store_true",
+        help="Show the 5 closest Italian municipalities for each earthquake."
+    )
 
     # Parse the arguments
     args = parser.parse_args()
@@ -41,7 +46,20 @@ def main():
     earthquakes = query_db(args.K, args.days, args.magnitude)
 
     # Print the results in the required format
-    print_earthquakes(earthquakes)
+    if args.closest_municipalities:
+        # Print with closest municipalities
+        for day, time, mag, lat, lon, place in earthquakes:
+            print(
+                f"day: {day}, time: {time}, magnitude: {mag}, "
+                f"lat: {lat}, lon: {lon}, place: {place}"
+            )
+            # Get and print the 5 closest municipalities
+            closest = get_closest_municipalities(lat, lon, n=5)
+            for municipality, distance in closest:
+                print(f"  - {municipality}: {distance:.2f} km")
+    else:
+        # Use original output format
+        print_earthquakes(earthquakes)
 
 if __name__ == "__main__":
     main()
