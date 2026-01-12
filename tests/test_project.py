@@ -3,7 +3,7 @@ from unittest import TestCase
 import csv
 import sqlite3
 import os
-from eq_package.earthquakes import create_earthquake_db, query_db
+from eq_package.db import create_earthquake_db, query_db
 
 
 class TestProject(TestCase):
