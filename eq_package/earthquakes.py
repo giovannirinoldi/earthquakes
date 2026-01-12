@@ -1,6 +1,7 @@
 import csv
 import sqlite3
 import math
+import pathlib
 
 import requests
 from datetime import datetime, timedelta, timezone
@@ -31,7 +32,10 @@ def gather_earthquakes(days):
     """
     # Step 1: Read the bounding box parameters from CSV file
     bounding_box = {}
-    with open('eq_package/bounding_box.csv', mode='r') as file:
+
+    csv_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "bounding_box.csv"
+
+    with open(csv_path, mode='r') as file:
         reader = csv.reader(file)
         for row in reader:
             bounding_box[row[0]] = float(row[1])
@@ -121,8 +125,11 @@ def create_earthquake_db(days) -> None:
     # (day, time, mag, latitude, longitude, place)
     earthquakes = gather_earthquakes(days)
 
+    # Resolve path to data directory
+    db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+
     # Open a connection to the SQLite database
-    conn = sqlite3.connect("earthquakes.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # SQL statement to create the table if it does not already exist
@@ -181,8 +188,11 @@ def query_db(k, days, min_magnitude) -> list[tuple]:
     # Calculate the minimum date to consider
     min_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
+    # Resolve path to data directory
+    db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+
     # Connect to the db
-    conn = sqlite3.connect("earthquakes.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # Write the query
@@ -270,8 +280,11 @@ def get_closest_municipalities(eq_lat, eq_lon, n=5):
     """
     municipalities = []
 
+    # Resolve path to the right directory
+    csv_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "italian_municipalities.csv"
+
     # Load municipalities from CSV
-    with open('italian_municipalities.csv', mode='r', encoding='utf-8') as file:
+    with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
             name = row['name']

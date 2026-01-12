@@ -3,12 +3,13 @@ This module provides functionality to write a dictionary containing geographic
 bounding box data to a CSV file. The bounding box specifies the geographic
 area of interest using minimum/maximum latitude and longitude values.
 
-The generated CSV file can be used as input for other programs or functions
-that require bounding box information, such as querying earthquake data
-from APIs.
+The generated CSV file is saved in the 'data' directory and can be used as input
+for other programs or functions that require bounding box information, such as
+querying earthquake data from APIs.
 """
 
 import csv
+import pathlib
 
 
 def write_bounding_box():
@@ -41,9 +42,12 @@ def write_bounding_box():
         'maxlongitude': 20.0
     }
 
-    # Open 'bounding_box.csv' in write mode
+    # Resolve path to data directory
+    csv_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "bounding_box.csv"
+
+    # Open csv_path in write mode
     # Use newline='' to prevent extra blank lines in the CSV file on Windows
-    with open('bounding_box.csv', mode='w', newline='') as file:
+    with open(csv_path, mode='w', newline='') as file:
         writer = csv.writer(file)  # Initialize the CSV writer
         # Write each key-value pair as a row in the CSV file
         for key, value in bounding_box.items():
