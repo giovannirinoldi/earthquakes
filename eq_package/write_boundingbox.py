@@ -1,38 +1,44 @@
 """
-This module provides functionality to write a dictionary containing geographic
-bounding box data to a CSV file. The bounding box specifies the geographic
-area of interest using minimum/maximum latitude and longitude values.
+Bounding box utilities for the Earthquakes project.
 
-The generated CSV file is saved in the 'data' directory and can be used as input
-for other programs or functions that require bounding box information, such as
-querying earthquake data from APIs.
+This module provides functionality to write the geographic bounding box
+parameters to a CSV file. The bounding box defines the geographic area of
+interest (Italy) using minimum and maximum latitude and longitude values.
+
+The generated CSV file is used by other modules (e.g. ingv_client) to restrict
+earthquake queries to the Italian territory.
+
+Output file:
+    data/bounding_box.csv
+
+File format:
+    Each row contains a key-value pair:
+        <key>,<value>
+    where key is one of:
+        - minlatitude
+        - maxlatitude
+        - minlongitude
+        - maxlongitude
 """
 
 import csv
 import pathlib
 
-
 def write_bounding_box():
     """
-    Writes the geographic bounding box data to a CSV file.
+    Write the geographic bounding box data to a CSV file.
 
-    The bounding box data includes the following values:
-    - Minimum latitude
-    - Maximum latitude
-    - Minimum longitude
-    - Maximum longitude
+    The bounding box is defined by the following values:
+        - minlatitude
+        - maxlatitude
+        - minlongitude
+        - maxlongitude
 
-    Each key-value pair from the bounding box dictionary is written as a row
-    in the file 'bounding_box.csv', with the key in the first column and the
-    corresponding value in the second column.
-
-    File Created:
-        - bounding_box.csv: Contains rows formatted as:
-          key, value
+    These values are written as key-value pairs into the file:
+        data/bounding_box.csv
 
     Returns:
-        None: The function does not return a value; it writes output directly
-        to a file.
+        None
     """
     # Define the bounding box dictionary
     bounding_box = {
@@ -54,6 +60,14 @@ def write_bounding_box():
             writer.writerow([key, value])
 
 
-# Call the function to create and write to the CSV file if this script is executed
+# Optional: Test the function
 if __name__ == "__main__":
+    """
+    Manual test block.
+
+    When this module is executed directly, it will generate the bounding_box.csv
+    file in the data directory using the predefined bounding box values.
+
+    This is intended for development and debugging purposes only.
+    """
     write_bounding_box()

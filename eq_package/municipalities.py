@@ -1,3 +1,27 @@
+"""
+Municipalities utilities for the Earthquakes project.
+
+This module provides functions to work with Italian municipalities data.
+
+Main responsibilities:
+- compute geographic distances between coordinates (Haversine formula)
+- find the closest Italian municipalities to a given earthquake epicenter
+
+Data source:
+    The module expects a CSV file named `italian_municipalities.csv` stored
+    in the `data/` directory (sibling of the package directory).
+
+Expected CSV columns:
+    - name: municipality name (string)
+    - latitude: latitude in decimal degrees (float)
+    - longitude: longitude in decimal degrees (float)
+
+Typical usage:
+    closest = get_closest_municipalities(eq_lat, eq_lon, n=5)
+    for name, km in closest:
+        print(name, km)
+"""
+
 import csv
 import math
 import pathlib
@@ -5,6 +29,9 @@ import pathlib
 def calculate_distance(lat1, lon1, lat2, lon2):
     """
     Calculate the distance between two points on Earth using the Haversine formula.
+
+    The Haversine formula returns the great-circle distance between two points
+    on a sphere from their longitudes and latitudes.
 
     Args:
         lat1 (float): Latitude of the first point in degrees.
@@ -40,16 +67,23 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
 def get_closest_municipalities(eq_lat, eq_lon, n=5):
     """
-    Find the n closest Italian municipalities to an earthquake epicenter.
+        Find the `n` closest Italian municipalities to an earthquake epicenter.
 
-    Args:
-        eq_lat (float): Latitude of the earthquake epicenter.
-        eq_lon (float): Longitude of the earthquake epicenter.
-        n (int): Number of closest municipalities to return (default: 5).
+        This function loads the municipalities dataset from:
+            data/italian_municipalities.csv
 
-    Returns:
-        list[tuple]: List of tuples containing (municipality_name, distance_in_km).
-    """
+        For each municipality, it computes the great-circle distance (in km) from the
+        earthquake epicenter (eq_lat, eq_lon) and returns the closest `n` results.
+
+        Args:
+            eq_lat (float): Latitude of the earthquake epicenter (decimal degrees).
+            eq_lon (float): Longitude of the earthquake epicenter (decimal degrees).
+            n (int): Number of closest municipalities to return (default: 5).
+
+        Returns:
+            list[tuple]: List of tuples (municipality_name, distance_km), sorted by
+            increasing distance, with length at most `n`.
+        """
     municipalities = []
 
     # Resolve path to the right directory

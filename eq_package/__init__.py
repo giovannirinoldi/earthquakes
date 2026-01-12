@@ -1,11 +1,6 @@
 """
-Earthquake data package.
+Earthquakes package.
 
-This package provides utilities to retrieve information about
-recent earthquakes using the USGS earthquake service.
+This package provides tools to fetch earthquake data from INGV, store them in a
+local SQLite database and perform queries based on time range and magnitude.
 """
-
-from eq_package.ingv_client import gather_earthquakes
-from eq_package.db import create_earthquake_db
-
-__all__ = ["gather_earthquakes", "create_earthquake_db"]

@@ -1,18 +1,48 @@
+"""
+Database utilities for the Earthquakes project.
+
+This module contains functions to:
+- create and populate a local SQLite database with earthquake data
+- query the database for the strongest earthquakes given constraints
+- print earthquake records in the required output format
+
+Database location:
+    The SQLite database file is saved in the `data/` folder as:
+        data/earthquakes.db
+
+Table schema:
+    earthquakes_db(
+        day TEXT,
+        time TEXT,
+        mag REAL,
+        latitude REAL,
+        longitude REAL,
+        place TEXT
+    )
+
+Notes:
+    - Earthquake data are retrieved via `gather_earthquakes(days)`.
+    - Duplicates are prevented using a UNIQUE constraint and `INSERT OR IGNORE`.
+"""
+
 import sqlite3
 import pathlib
 from eq_package.ingv_client import gather_earthquakes
+from datetime import datetime, timedelta
 
 def create_earthquake_db(days) -> None:
     """
-    Create an SQLite database and populate it with recent earthquake data.
+    Create (if needed) and populate the SQLite database with earthquake data.
 
-    This function:
-    1. Calls the gather_earthquakes function and
-        stores its output in a variable called 'earthquakes'.
-    2. Creates (if it does not already exist) a table named 'earthquakes_db'
-       with columns: day, time, mag, latitude, longitude, place.
-    3. Inserts all earthquake records into the database using executemany.
-    4. Closes the cursor and the database connection.
+    Workflow:
+        1) Fetch earthquakes from INGV for the last `days` days using
+           `gather_earthquakes(days)`.
+        2) Create the `earthquakes_db` table if it does not already exist.
+        3) Insert earthquake records into the table (duplicates are ignored).
+        4) Close the database connection.
+
+    Args:
+        days (int): Number of days in the past for which to fetch earthquake data.
 
     Returns:
         None
@@ -60,26 +90,37 @@ def create_earthquake_db(days) -> None:
     conn.close()
 
 
-# Test the function
+# Optional: Test the function
 if __name__ == "__main__":
+    """
+    Manual test entrypoint.
+
+    Note:
+        This block is meant for quick manual checks. The production entrypoint
+        for the project should be the interface (argparse) module.
+    """
+    # Example: Fetch earthquakes from the last 7 days
     days = 7
     create_earthquake_db()
     print("Database created and populated")
 
 def query_db(k, days, min_magnitude) -> list[tuple]:
     """
-    Query the earthquakes.db database for the strongest earthquakes.
+    Query the earthquakes database for the strongest earthquakes.
 
-    Returns at most k earthquakes with magnitude >= min_magnitude that occurred
-    in the last `days` days, sorted by decreasing magnitude. (from tab earthquakes_db)
+    The query returns at most `k` earthquakes that:
+    - have magnitude >= `min_magnitude`
+    - occurred within the last `days` days
+    Results are sorted by decreasing magnitude.
 
-    Arguments:
+    Args:
         k (int): Maximum number of earthquakes to return.
         days (int): Number of past days to consider.
         min_magnitude (float): Minimum magnitude threshold.
 
     Returns:
-        list[tuple]: List of tuples representing database rows.
+        list[tuple]: List of rows in the format:
+            (day, time, mag, latitude, longitude, place)
     """
     # Calculate the minimum date to consider
     min_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
@@ -116,8 +157,15 @@ def print_earthquakes(earthquakes) -> None:
     """
     Print earthquake records in the required formatted style.
 
-    Arguments:
-        earthquakes (list[tuple]): List of earthquake tuples.
+    Each record is printed on one line using the format:
+        day: <day>, time: <time>, magnitude: <mag>, lat: <lat>, lon: <lon>, place: <place>
+
+    Args:
+        earthquakes (list[tuple]): List of earthquake tuples in the format:
+            (day, time, mag, lat, lon, place)
+
+    Returns:
+        None
     """
     for day, time, mag, lat, lon, place in earthquakes:
         print(

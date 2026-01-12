@@ -1,35 +1,60 @@
+"""
+INGV client module for the Earthquakes project.
+
+This module is responsible for retrieving earthquake data from the
+INGV (Istituto Nazionale di Geofisica e Vulcanologia) web services.
+
+It:
+- reads the geographic bounding box from the CSV file
+- builds the query for the INGV API
+- sends the HTTP request
+- parses the response
+- returns earthquake data in a structured format
+
+This module does NOT handle:
+- database operations
+- command line parsing
+- printing output
+"""
+
 import csv
 import pathlib
 import requests
 from datetime import datetime, timedelta
+from eq_package.write_boundingbox import write_bounding_box
 
 def gather_earthquakes(days):
     """
-    Fetch recent earthquake data from the INGV API within a
-    specified time range and geographic bounding box.
+    Fetch recent earthquake data from the INGV API within a specified time range
+    and geographic bounding box.
 
-    The function reads geographic bounding box coordinates from
-    a CSV file named 'bounding_box.csv',
-    queries the INGV API for earthquake data, and
-    returns a list of tuples containing the earthquake details.
+    This function ensures that the bounding box file exists by calling
+    `write_bounding_box()` if necessary, then reads the geographic coordinates
+    from `bounding_box.csv`, queries the INGV API for earthquake data, and returns
+    the results in a structured format.
 
     Args:
-        days (int):
-        The number of days in the past to fetch earthquake data for.
+        days (int): Number of days in the past to fetch earthquake data for.
 
     Returns:
-    list: A list of tuples, where each tuple contains:
-    - day (str): The date of the earthquake (YYYY-MM-DD format).
-    - time (str): The time of the earthquake (HH:MM:SS format).
-    - magnitude (float or None): The magnitude of the earthquake.
-    - latitude (float): The latitude of the earthquake's epicenter.
-    - longitude (float): The longitude of the earthquake's epicenter.
-    - place (str): A human-readable description of the earthquake's location.
+        list[tuple]: A list of earthquake records. Each tuple contains:
+            - day (str): Date of the earthquake (YYYY-MM-DD format)
+            - time (str): Time of the earthquake (HH:MM:SS format)
+            - magnitude (float): Magnitude of the earthquake
+            - latitude (float): Latitude of the earthquake epicenter
+            - longitude (float): Longitude of the earthquake epicenter
+            - place (str): Human-readable description of the location
     """
+
     # Step 1: Read the bounding box parameters from CSV file
     bounding_box = {}
 
+    # Resolve path to data directory
     csv_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "bounding_box.csv"
+
+    # Create the CSV only if it does not exist yet
+    if not csv_path.exists():
+        write_bounding_box()
 
     with open(csv_path, mode='r') as file:
         reader = csv.reader(file)
@@ -95,7 +120,18 @@ def gather_earthquakes(days):
 
 # Optional: Test the function
 if __name__ == "__main__":
-    days = 7  # Example: Fetch earthquakes from the last 7 days
+    """
+        Manual test block for the ingv_client module.
+
+        This block allows the module to be executed directly in order to:
+        - fetch earthquake data for a fixed number of days
+        - print the retrieved records to the console
+
+        This is intended only for development and debugging purposes.
+        In the final application, the main entry point is handled by the interface module.
+        """
+    # Example: Fetch earthquakes from the last 7 days
+    days = 7
     earthquakes = gather_earthquakes(days)
     print("Earthquake Data:")
     for eq in earthquakes:

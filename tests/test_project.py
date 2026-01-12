@@ -1,16 +1,22 @@
+"""
+
+"""
+
 import unittest
 from unittest import TestCase
 import csv
 import sqlite3
-import os
 from eq_package.db import create_earthquake_db, query_db
+from eq_package.write_boundingbox import write_bounding_box
+import pathlib
 
 
 class TestProject(TestCase):
     @classmethod
     def setUpClass(cls):
         """Ensure earthquakes.db exists before running tests."""
-        if not os.path.exists("earthquakes.db"):
+        db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+        if not db_path.exists():
             print("Creating earthquakes.db...")
             create_earthquake_db(days=30)
 
@@ -18,7 +24,13 @@ class TestProject(TestCase):
         """Test that specific Italian cities are within the bounding box."""
         # Read bounding_box.csv
         bounding_box = {}
-        with open('eq_package/bounding_box.csv', mode='r') as file:
+        # Resolve path to data directory
+        csv_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "bounding_box.csv"
+        # Create the CSV only if it does not exist yet
+        if not csv_path.exists():
+            write_bounding_box()
+
+        with open(csv_path, mode='r') as file:
             reader = csv.reader(file)
             for row in reader:
                 bounding_box[row[0]] = float(row[1])
@@ -44,11 +56,12 @@ class TestProject(TestCase):
     def test_magnitude(self):
         """Test that no earthquake has magnitude greater than 9.5."""
         # Ensure database exists
-        if not os.path.exists("earthquakes.db"):
+        db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+        if not db_path.exists():
             create_earthquake_db(days=30)
 
         # Query database directly
-        conn = sqlite3.connect("earthquakes.db")
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT MAX(mag) FROM earthquakes_db")
         max_magnitude = cursor.fetchone()[0]
@@ -63,7 +76,8 @@ class TestProject(TestCase):
     def test_order(self):
         """Test that query_db returns earthquakes sorted by decreasing magnitude."""
         # Ensure database exists
-        if not os.path.exists("earthquakes.db"):
+        db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+        if not db_path.exists():
             create_earthquake_db(days=30)
 
         # Query the database
@@ -79,11 +93,12 @@ class TestProject(TestCase):
     def test_database_has_data(self):
         """Test that the database contains at least one earthquake record."""
         # Ensure database exists
-        if not os.path.exists("earthquakes.db"):
+        db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+        if not db_path.exists():
             create_earthquake_db(days=30)
 
         # Query database for row count
-        conn = sqlite3.connect("earthquakes.db")
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM earthquakes_db")
         count = cursor.fetchone()[0]
