@@ -43,7 +43,6 @@ earthquakes/
 └── LICENSE                           # License file
 ```
 
-
 ## Installation
 
 ### Prerequisites
@@ -72,6 +71,7 @@ The following standard library modules are also used:
 
 1. Clone or download this repository
 2. Navigate to the project directory:
+
    ```
    cd earthquakes
    ```
