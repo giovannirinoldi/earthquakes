@@ -5,8 +5,8 @@ from the INGV (Istituto Nazionale di Geofisica e Vulcanologia) web services,
 stores them in a local SQLite database, and allows the user to query the strongest
 earthquakes in Italy within a given time window and magnitude threshold.
 
-The project was developed as part of a university course and follows
-a modular design with clear separation of responsibilities.
+The project was developed for educational purposes as part of the
+Lab of Software Project Development course at H-FARM.
 
 ## Features
 
@@ -28,7 +28,7 @@ earthquakes/
 │   └── earthquakes.db                # SQLite database (auto-generated)
 │
 ├── eq_package/
-│   ├── init.py
+│   ├── __init__.py
 │   ├── interface.py                  # Command-line interface (argparse)
 │   ├── ingv_client.py                # INGV API client
 │   ├── db.py                         # Database creation and querying
@@ -75,6 +75,7 @@ The following standard library modules are also used:
    ```
    cd earthquakes
    ```
+The files `data/bounding_box.csv` and `data/earthquakes.db` are automatically generated when the application is first executed.
 
 ## Usage
 
@@ -203,7 +204,8 @@ Where R = 6371 km (Earth's radius)
 
 ## License
 
-This project is developed for educational purposes as part of the Lab of Software Project Development course at H-FARM.
+This project is released under the Apache License, Version 2.0.  
+See the LICENSE file for details.
 
 ## Disclaimer
 
