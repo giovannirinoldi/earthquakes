@@ -80,15 +80,6 @@ def main():
     # Parse the arguments
     args = parser.parse_args()
 
-    # Print the parsed arguments (Just to verify the input)
-    print(f"""User parameters:
-        \n
-        Days: {args.days},
-        K: {args.K},
-        Magnitude: {args.magnitude}
-        \n
-    """)
-
     # Create or update the earthquake database
     create_earthquake_db(args.days)
 
