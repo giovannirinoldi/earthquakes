@@ -1,18 +1,50 @@
-# 🌍 Italian Earthquake Tracker
+# Italian Earthquake Tracker
 
-A Python application that fetches, stores, and analyzes real-time earthquake data from Italy using the INGV (Istituto Nazionale di Geofisica e Vulcanologia) API. The application provides advanced filtering, SQLite storage, and optional geographic proximity analysis to Italian municipalities.
+This project is a command-line application that retrieves recent earthquake data
+from the INGV (Istituto Nazionale di Geofisica e Vulcanologia) web services,
+stores them in a local SQLite database, and allows the user to query the strongest
+earthquakes in Italy within a given time window and magnitude threshold.
 
-## 📋 Features
+The project was developed as part of a university course and follows
+a modular design with clear separation of responsibilities.
 
-- **Real-time Data Fetching**: Retrieves earthquake data from the official INGV API
-- **Geographic Filtering**: Automatically filters earthquakes within Italy's bounding box
-- **SQLite Database**: Persistent storage with automatic duplicate prevention
-- **Advanced Querying**: Filter by magnitude, time range, and number of results
-- **Proximity Analysis**: Calculate and display the 5 closest Italian municipalities to each earthquake epicenter
-- **Haversine Distance Calculation**: Accurate distance measurements using the spherical Earth model
-- **Comprehensive Testing**: Full test suite with unittest framework
+## Features
 
-## 🚀 Installation
+- Retrieval of earthquake data from the INGV API
+- Geographic filtering using a predefined bounding box
+- Persistent storage using SQLite with duplicate prevention
+- Querying by time window, magnitude and number of results
+- Computation of distances to the closest Italian municipalities
+- Automated test suite using the unittest framework
+
+## Project Structure
+
+```
+earthquakes/
+│
+├── data/
+│   ├── bounding_box.csv              # Italy’s geographic bounding box (auto-generated)
+│   ├── italian_municipalities.csv    # Dataset of Italian municipalities with coordinates
+│   └── earthquakes.db                # SQLite database (auto-generated)
+│
+├── eq_package/
+│   ├── init.py
+│   ├── interface.py                  # Command-line interface (argparse)
+│   ├── ingv_client.py                # INGV API client
+│   ├── db.py                         # Database creation and querying
+│   ├── municipalities.py             # Distance and proximity utilities
+│   └── write_boundingbox.py          # Bounding box generator
+│
+├── tests/
+│   └── test_project.py               # Unit test suite
+│
+├── main.py                           # Project entry point
+├── README.md                         # This file
+└── LICENSE                           # License file
+```
+
+
+## Installation
 
 ### Prerequisites
 
@@ -23,7 +55,7 @@ A Python application that fetches, stores, and analyzes real-time earthquake dat
 
 Install the required packages:
 
-```bash
+```
 pip install requests
 ```
 
@@ -34,28 +66,23 @@ The following standard library modules are also used:
 - `datetime`
 - `math`
 - `unittest`
+- `pathlib`
 
 ### Setup
 
 1. Clone or download this repository
 2. Navigate to the project directory:
-   ```bash
+   ```
    cd earthquakes
    ```
-3. Ensure all files are present:
-   - `main.py`
-   - `eq_package/earthquakes.py`
-   - `eq_package/bounding_box.csv`
-   - `italian_municipalities.csv`
-   - `test_project.py`
 
-## 💻 Usage
+## Usage
 
 ### Basic Command
 
 Fetch the top K strongest earthquakes from the last N days with a minimum magnitude:
 
-```bash
+```
 python main.py --days <DAYS> --K <COUNT> --magnitude <MIN_MAG>
 ```
 
@@ -63,27 +90,28 @@ python main.py --days <DAYS> --K <COUNT> --magnitude <MIN_MAG>
 
 Add the `--closest-municipalities` flag to show the 5 nearest Italian cities to each earthquake:
 
-```bash
+```
 python main.py --days <DAYS> --K <COUNT> --magnitude <MIN_MAG> --closest-municipalities
 ```
 
 ### Examples
 
 **Example 1**: Get the top 5 earthquakes from the last 30 days with magnitude ≥ 2.0
-```bash
+```
 python main.py --days 30 --K 5 --magnitude 2.0
 ```
 
 **Output**:
 ```
 day: 2026-01-10, time: 04:53:11, magnitude: 5.1, lat: 37.7492, lon: 16.2262, place: Costa Calabra sud-orientale (Reggio di Calabria)
+day: 2026-01-13, time: 08:27:58, magnitude: 4.3, lat: 44.3162, lon: 11.9993, place: 7 km SW Russi (RA)
 day: 2025-12-17, time: 22:07:46, magnitude: 4.2, lat: 42.5563, lon: 17.619, place: Costa Croata meridionale (CROAZIA)
+day: 2026-01-13, time: 08:29:17, magnitude: 4.1, lat: 44.288, lon: 11.9795, place: 8 km E Faenza (RA)
 day: 2025-12-15, time: 09:11:22, magnitude: 4.0, lat: 36.4612, lon: 16.7235, place: Mar Ionio Meridionale (MARE)
-...
 ```
 
 **Example 2**: Same query with closest municipalities
-```bash
+```
 python main.py --days 30 --K 5 --magnitude 2.0 --closest-municipalities
 ```
 
@@ -98,7 +126,7 @@ day: 2026-01-10, time: 04:53:11, magnitude: 5.1, lat: 37.7492, lon: 16.2262, pla
 ...
 ```
 
-### Command-Line Arguments
+### Available Command-Line Arguments
 
 | Argument | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -107,60 +135,12 @@ day: 2026-01-10, time: 04:53:11, magnitude: 5.1, lat: 37.7492, lon: 16.2262, pla
 | `--magnitude` | float | Yes | Minimum magnitude threshold for filtering |
 | `--closest-municipalities` | flag | No | Show 5 closest Italian municipalities for each earthquake |
 
-## 📁 Project Structure
+## Testing
+
+The project includes a test suite implementing the required test cases:
 
 ```
-earthquakes/
-│
-├── main.py                          # Main entry point and CLI interface
-├── eq_package/
-│   ├── __init__.py                  # Package initializer
-│   ├── earthquakes.py               # Core functionality (API, database, calculations)
-│   ├── bounding_box.csv             # Italy's geographic bounding box
-│   ├── LICENSE                      # Package license
-│   ├── README.md                    # Package documentation
-│   └── write_boundingbox.py         # Utility for bounding box generation
-│
-├── italian_municipalities.csv       # Dataset of 170+ Italian municipalities with coordinates
-├── test_project.py                  # Comprehensive test suite
-├── earthquakes.db                   # SQLite database (auto-generated)
-└── README.md                        # This file
-```
-
-## 🔧 Core Functions
-
-### `gather_earthquakes(days)`
-Fetches earthquake data from the INGV API within Italy's bounding box for the specified time range.
-
-**Returns**: List of tuples `(day, time, magnitude, latitude, longitude, place)`
-
-### `create_earthquake_db(days)`
-Creates/updates an SQLite database with earthquake records, automatically handling duplicates.
-
-### `query_db(k, days, min_magnitude)`
-Queries the database for the top K earthquakes matching the criteria, sorted by decreasing magnitude.
-
-**Returns**: List of earthquake tuples
-
-### `calculate_distance(lat1, lon1, lat2, lon2)`
-Calculates the great-circle distance between two points using the Haversine formula.
-
-**Returns**: Distance in kilometers
-
-### `get_closest_municipalities(eq_lat, eq_lon, n=5)`
-Finds the N closest Italian municipalities to an earthquake epicenter.
-
-**Returns**: List of tuples `(municipality_name, distance_km)`
-
-### `print_earthquakes(earthquakes)`
-Prints earthquake records in a standardized format.
-
-## 🧪 Testing
-
-The project includes a comprehensive test suite with 4 test cases:
-
-```bash
-python -m unittest test_project.py
+python -m unittest tests/test_project.py
 ```
 
 ### Test Cases
@@ -172,24 +152,27 @@ python -m unittest test_project.py
 
 ### Running Tests with Verbose Output
 
-```bash
-python -m unittest test_project.py -v
+```
+python -m unittest tests/test_project.py -v
 ```
 
-## 📊 Data Sources
+-v prints each test name and its result (ok/fail/error) for easier debugging.
+
+## Data Sources
 
 - **Earthquake Data**: [INGV (Istituto Nazionale di Geofisica e Vulcanologia)](https://webservices.ingv.it/)
   - Real-time seismic data from Italy's national geophysical institute
   - API endpoint: `https://webservices.ingv.it/fdsnws/event/1/query`
 
-- **Municipality Coordinates**: `italian_municipalities.csv`
+- **Municipality Coordinates**: `data/italian_municipalities.csv`
   - 170+ major Italian municipalities
   - Includes name, latitude, and longitude for each location
 
-- **Geographic Boundaries**: `eq_package/bounding_box.csv`
+- **Geographic Boundaries**: `data/bounding_box.csv`
   - Italy's bounding box: 35°N - 47.5°N, 5°E - 20°E
+  - Auto-generated if missing
 
-## 🛠️ Technical Details
+## Technical Details
 
 ### Database Schema
 
@@ -198,13 +181,13 @@ python -m unittest test_project.py -v
 | Column | Type | Description |
 |--------|------|-------------|
 | day | TEXT | Date in YYYY-MM-DD format |
-| time | TEXT | Time in HH:MM:SS format (UTC) |
+| time | TEXT | Time in HH:MM:SS format (UTC, as provided by INGV) |
 | mag | REAL | Earthquake magnitude |
 | latitude | REAL | Epicenter latitude |
 | longitude | REAL | Epicenter longitude |
 | place | TEXT | Human-readable location description |
 
-**Constraints**: UNIQUE on all columns to prevent duplicates
+**Constraints**: A UNIQUE constraint is applied to all columns to prevent duplicate earthquake records when the database is updated multiple times.
 
 ### Haversine Formula
 
@@ -218,32 +201,20 @@ distance = R × c
 
 Where R = 6371 km (Earth's radius)
 
-## 🤝 Contributing
-
-Contributions are welcome! To contribute:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
+## License
 
 This project is developed for educational purposes as part of the Lab of Software Project Development course at H-FARM.
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This application is for educational and informational purposes only. For official earthquake information and emergency situations, please refer to:
 - [INGV Official Website](https://www.ingv.it/)
 - Local civil protection authorities
 - Emergency services (112 in Italy)
 
-## 📧 Support
+## Support
 
 For questions, issues, or suggestions, please open an issue in the repository.
-
----
 
 **Version**: 1.0.0  
 **Last Updated**: January 2026  
