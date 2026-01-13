@@ -24,6 +24,7 @@ File format:
 import csv
 import pathlib
 
+
 def write_bounding_box():
     """
     Write the geographic bounding box data to a CSV file.
@@ -49,7 +50,8 @@ def write_bounding_box():
     }
 
     # Resolve path to data directory
-    csv_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "bounding_box.csv"
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    csv_path = base_dir / "data" / "bounding_box.csv"
 
     # Open csv_path in write mode
     # Use newline='' to prevent extra blank lines in the CSV file on Windows
@@ -65,7 +67,7 @@ if __name__ == "__main__":
     """
     Manual test block.
 
-    When this module is executed directly, it will generate the bounding_box.csv
+    If this module is executed directly, it will generate the bounding_box.csv
     file in the data directory using the predefined bounding box values.
 
     This is intended for development and debugging purposes only.

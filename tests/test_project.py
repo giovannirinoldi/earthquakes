@@ -28,7 +28,7 @@ class TestProject(TestCase):
     """
     Test suite for the Earthquakes project.
 
-    This class uses `setUpClass` to ensure that required files exist before tests:
+    This class uses `setUpClass` to ensure that required files exist:
     - `data/earthquakes.db` (created by create_earthquake_db)
     - `data/bounding_box.csv` (created by write_bounding_box when needed)
 
@@ -111,8 +111,9 @@ class TestProject(TestCase):
 
         # Assert no earthquake exceeds 9.5
         if max_magnitude is not None:
-            self.assertLessEqual(max_magnitude, 9.5,
-                            "Found earthquake with magnitude > 9.5")
+            self.assertLessEqual(
+                max_magnitude, 9.5, "Found earthquake with magnitude > 9.5"
+            )
 
     def test_order(self):
         # Query the database
@@ -136,14 +137,13 @@ class TestProject(TestCase):
         conn.close()
 
         # Assert database is not empty
-        self.assertGreater(count, 0,
-                           "Database should contain at least one earthquake record")
+        self.assertGreater(
+            count, 0, "Database should contain at least one earthquake record"
+        )
 
 
 if __name__ == "__main__":
     """
     Allow running this module directly.
-
-    Running `python tests/test_project.py` will execute the unittest test runner.
     """
     unittest.main()

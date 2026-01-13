@@ -22,13 +22,14 @@ Table schema:
 
 Notes:
     - Earthquake data are retrieved via `gather_earthquakes(days)`.
-    - Duplicates are prevented using a UNIQUE constraint and `INSERT OR IGNORE`.
+    - Duplicates prevention using a UNIQUE constraint and `INSERT OR IGNORE`.
 """
 
 import sqlite3
 import pathlib
 from eq_package.ingv_client import gather_earthquakes
 from datetime import datetime, timedelta
+
 
 def create_earthquake_db(days) -> None:
     """
@@ -42,7 +43,7 @@ def create_earthquake_db(days) -> None:
         4) Close the database connection.
 
     Args:
-        days (int): Number of days in the past for which to fetch earthquake data.
+        days (int): Days in the past for which to fetch earthquake data.
 
     Returns:
         None
@@ -52,7 +53,8 @@ def create_earthquake_db(days) -> None:
     earthquakes = gather_earthquakes(days)
 
     # Resolve path to data directory
-    db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    db_path = base_dir / "data" / "earthquakes.db"
 
     # Open a connection to the SQLite database
     conn = sqlite3.connect(db_path)
@@ -67,7 +69,7 @@ def create_earthquake_db(days) -> None:
         latitude REAL,
         longitude REAL,
         place TEXT,
-        UNIQUE(day, time, mag, latitude, longitude, place) 
+        UNIQUE(day, time, mag, latitude, longitude, place)
     );
     """
 
@@ -77,10 +79,10 @@ def create_earthquake_db(days) -> None:
 
     # SQL statement to insert data into the table
     insert_sql = """
-    INSERT OR IGNORE INTO earthquakes_db (day, time, mag, latitude, longitude, place)
+    INSERT OR IGNORE INTO earthquakes_db
+    (day, time, mag, latitude, longitude, place)
     VALUES (?, ?, ?, ?, ?, ?);
     """
-
     # Insert all earthquake records into the database
     cursor.executemany(insert_sql, earthquakes)
     conn.commit()
@@ -104,6 +106,7 @@ if __name__ == "__main__":
     create_earthquake_db()
     print("Database created and populated")
 
+
 def query_db(k, days, min_magnitude) -> list[tuple]:
     """
     Query the earthquakes database for the strongest earthquakes.
@@ -126,7 +129,8 @@ def query_db(k, days, min_magnitude) -> list[tuple]:
     min_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
     # Resolve path to data directory
-    db_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "earthquakes.db"
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    db_path = base_dir / "data" / "earthquakes.db"
 
     # Connect to the db
     conn = sqlite3.connect(db_path)
@@ -158,7 +162,9 @@ def print_earthquakes(earthquakes) -> None:
     Print earthquake records in the required formatted style.
 
     Each record is printed on one line using the format:
-        day: <day>, time: <time>, magnitude: <mag>, lat: <lat>, lon: <lon>, place: <place>
+        day: <day>, time: <time>,
+        magnitude: <mag>, lat: <lat>,
+        lon: <lon>, place: <place>
 
     Args:
         earthquakes (list[tuple]): List of earthquake tuples in the format:
@@ -172,4 +178,3 @@ def print_earthquakes(earthquakes) -> None:
             f"day: {day}, time: {time}, magnitude: {mag}, "
             f"lat: {lat}, lon: {lon}, place: {place}"
         )
-

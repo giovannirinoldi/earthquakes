@@ -23,15 +23,16 @@ import requests
 from datetime import datetime, timedelta
 from eq_package.write_boundingbox import write_bounding_box
 
+
 def gather_earthquakes(days):
     """
-    Fetch recent earthquake data from the INGV API within a specified time range
-    and geographic bounding box.
+    Fetch recent earthquake data from the INGV API within a
+    specified time range and geographic bounding box.
 
     This function ensures that the bounding box file exists by calling
     `write_bounding_box()` if necessary, then reads the geographic coordinates
-    from `bounding_box.csv`, queries the INGV API for earthquake data, and returns
-    the results in a structured format.
+    from `bounding_box.csv`, queries the INGV API for earthquake data,
+    and returns the results in a structured format.
 
     Args:
         days (int): Number of days in the past to fetch earthquake data for.
@@ -50,7 +51,8 @@ def gather_earthquakes(days):
     bounding_box = {}
 
     # Resolve path to data directory
-    csv_path = pathlib.Path(__file__).resolve().parent.parent / "data" / "bounding_box.csv"
+    base_dir = pathlib.Path(__file__).resolve().parent.parent
+    csv_path = base_dir / "data" / "bounding_box.csv"
 
     # Create the CSV only if it does not exist yet
     if not csv_path.exists():
@@ -128,7 +130,6 @@ if __name__ == "__main__":
         - print the retrieved records to the console
 
         This is intended only for development and debugging purposes.
-        In the final application, the main entry point is handled by the interface module.
         """
     # Example: Fetch earthquakes from the last 7 days
     days = 7

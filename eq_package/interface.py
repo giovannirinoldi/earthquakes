@@ -7,7 +7,7 @@ the command line. It is responsible for:
 - parsing user arguments using argparse
 - orchestrating the execution flow of the program
 - invoking database creation and queries
-- optionally retrieving closest Italian municipalities
+- optionally retrieving closest italian municipalities
 - printing results in the required format
 
 This module does NOT:
@@ -22,30 +22,34 @@ import argparse
 from eq_package.municipalities import get_closest_municipalities
 from eq_package.db import create_earthquake_db, query_db, print_earthquakes
 
+
 def main():
     """
-        Main entry point for the Earthquakes command-line application.
+    Main entry point for the Earthquakes command-line application.
 
-        This function:
-            1) Parses command-line arguments provided by the user.
-            2) Creates or updates the local SQLite database with recent earthquake data.
-            3) Queries the database for the strongest earthquakes matching the criteria.
-            4) Prints the results to standard output.
-            5) Optionally displays the closest Italian municipalities for each earthquake.
+    This function:
+    - Parses command-line arguments provided by the user
+    - Creates or updates the local SQLite database with recent earthquake data
+    - Queries the database for the strongest earthquakes matching the criteria
+    - Prints the results to standard output
+    - (Optional) print the closest italian municipalities for each earthquake
 
-        Expected command-line arguments:
-            --days (int, required): Number of days in the past to fetch earthquake data for.
-            --K (int, required): Maximum number of strongest earthquakes to return.
-            --magnitude (float, required): Minimum magnitude of earthquakes to consider.
-            --closest-municipalities (flag, optional): If provided, show the 5 closest
-                Italian municipalities for each earthquake.
+    Expected command-line arguments:
+    --days (int, required): Days in the past to fetch earthquake data for
+    --K (int, required): Maximum number of strongest earthquakes to return
+    --magnitude (float, required): Minimum magnitude of earthquakes to consider
+    --closest-municipalities (flag, optional): If provided, show the 5 closest
+      italian municipalities for each earthquake
 
-        Returns:
-            None
-        """
+    Returns:
+        None
+    """
     # Create an argument parser object
     parser = argparse.ArgumentParser(
-        description="Fetch the strongest earthquakes in Italy within the specified number of days, based on the given magnitude and count (K)."
+        description="""
+        Fetch the strongest earthquakes in Italy within the given
+        number of days, based on the given magnitude and count (K).
+        """
     )
 
     # Add arguments
@@ -70,14 +74,20 @@ def main():
     parser.add_argument(
         "--closest-municipalities",
         action="store_true",
-        help="Show the 5 closest Italian municipalities for each earthquake."
+        help="Show the 5 closest ilian municipalities for each earthquake."
     )
 
     # Parse the arguments
     args = parser.parse_args()
 
     # Print the parsed arguments (Just to verify the input)
-    print(f"User parameters:\nDays: {args.days}, K: {args.K}, Magnitude: {args.magnitude}\n")
+    print(f"""User parameters:
+        \n
+        Days: {args.days},
+        K: {args.K},
+        Magnitude: {args.magnitude}
+        \n
+    """)
 
     # Create or update the earthquake database
     create_earthquake_db(args.days)
@@ -100,6 +110,7 @@ def main():
     else:
         # Use original output format
         print_earthquakes(earthquakes)
+
 
 # Optional: manual execution
 if __name__ == "__main__":
